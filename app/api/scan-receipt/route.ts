@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     // 2. 제미나이 AI 클라이언트 초기화
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-001" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // 3. 제미나이에게 내릴 지시사항(프롬프트)
     const prompt = `당신은 마트 영수증을 분석해 데이터로 변환하는 똑똑한 영수증 AI입니다. 
