@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, ListChecks, BarChart2, Loader2 } from "lucide-react";
 import { useFridge } from "@/hooks/use-fridge";
+import type { FoodItem } from "@/lib/types";
 import { DashboardHeader } from "@/components/fridge/dashboard-header";
 import { ItemList } from "@/components/fridge/food-item-card";
 import { AddItemModal } from "@/components/fridge/add-item-modal";
@@ -19,6 +20,7 @@ export function FridgeApp() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("list");
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [isGuest, setIsGuest] = useState(false);
 
@@ -41,6 +43,7 @@ export function FridgeApp() {
     loading,
     addItem,
     addItems,
+    updateItem,
     deleteItem,
     consumeItem,
     syncTossPay,
@@ -113,6 +116,10 @@ export function FridgeApp() {
                 filter={activeFilter}
                 onDelete={deleteItem}
                 onConsume={consumeItem}
+                onEdit={(id) => {
+                  const found = items.find((i) => i.id === id);
+                  if (found) { setEditingItem(found); setModalOpen(true); }
+                }}
               />
             </motion.div>
           ) : (
@@ -158,8 +165,10 @@ export function FridgeApp() {
 
       <AddItemModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => { setModalOpen(false); setEditingItem(null); }}
         onAdd={addItem}
+        editItem={editingItem ?? undefined}
+        onUpdate={updateItem}
       />
     </div>
   );

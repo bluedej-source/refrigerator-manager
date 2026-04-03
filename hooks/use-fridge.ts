@@ -175,6 +175,23 @@ export function useFridge() {
     }, 600);
   }, []);
 
+  const updateItem = useCallback(async (id: string, input: AddItemInput) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, name: input.name, category: input.category, expiryDate: input.expiryDate, storageType: input.storageType, price: input.price }
+          : item
+      )
+    );
+    await supabase.from("food_items").update({
+      name: input.name,
+      category: input.category,
+      expiry_date: input.expiryDate,
+      storage_type: input.storageType,
+      price: input.price ?? null,
+    }).eq("id", id);
+  }, []);
+
   const syncTossPay = useCallback(async () => {
     const tossItems: Omit<FoodItem, "id">[] = [
       {
@@ -231,6 +248,7 @@ export function useFridge() {
     loading,
     addItem,
     addItems,
+    updateItem,
     deleteItem,
     consumeItem,
     syncTossPay,

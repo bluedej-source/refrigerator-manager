@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Trash2,
   CheckCircle2,
+  Pencil,
   Milk,
   Beef,
   Carrot,
@@ -51,9 +52,10 @@ interface FoodItemCardProps {
   item: FoodItem;
   onDelete: (id: string) => void;
   onConsume: (id: string) => void;
+  onEdit: (id: string) => void;
 }
 
-export function FoodItemCard({ item, onDelete, onConsume }: FoodItemCardProps) {
+export function FoodItemCard({ item, onDelete, onConsume, onEdit }: FoodItemCardProps) {
   const days = getDaysUntilExpiry(item.expiryDate);
   const status = getExpiryStatus(item.expiryDate);
   const freshness = getFreshnessPercent(item.addedDate, item.expiryDate);
@@ -174,6 +176,13 @@ export function FoodItemCard({ item, onDelete, onConsume }: FoodItemCardProps) {
           다 먹었어요
         </button>
         <button
+          onClick={() => onEdit(item.id)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-muted text-muted-foreground hover:bg-secondary hover:text-primary transition-colors"
+          aria-label="수정"
+        >
+          <Pencil className="w-4 h-4" />
+        </button>
+        <button
           onClick={() => onDelete(item.id)}
           className="w-9 h-9 flex items-center justify-center rounded-xl bg-muted text-muted-foreground hover:bg-danger-bg hover:text-danger transition-colors"
           aria-label="삭제"
@@ -204,9 +213,10 @@ interface ItemListProps {
   filter?: FilterType;
   onDelete: (id: string) => void;
   onConsume: (id: string) => void;
+  onEdit: (id: string) => void;
 }
 
-export function ItemList({ items, filter = "all", onDelete, onConsume }: ItemListProps) {
+export function ItemList({ items, filter = "all", onDelete, onConsume, onEdit }: ItemListProps) {
   const dangerItems = items.filter((i) => getExpiryStatus(i.expiryDate) === "danger");
   const warningItems = items.filter((i) => getExpiryStatus(i.expiryDate) === "warning");
   const freshItems = items.filter((i) => getExpiryStatus(i.expiryDate) === "fresh");
@@ -231,6 +241,7 @@ export function ItemList({ items, filter = "all", onDelete, onConsume }: ItemLis
           items={dangerItems}
           onDelete={onDelete}
           onConsume={onConsume}
+          onEdit={onEdit}
         />
       )}
 
@@ -243,6 +254,7 @@ export function ItemList({ items, filter = "all", onDelete, onConsume }: ItemLis
           items={warningItems}
           onDelete={onDelete}
           onConsume={onConsume}
+          onEdit={onEdit}
         />
       )}
 
@@ -255,6 +267,7 @@ export function ItemList({ items, filter = "all", onDelete, onConsume }: ItemLis
           items={freshItems}
           onDelete={onDelete}
           onConsume={onConsume}
+          onEdit={onEdit}
         />
       )}
 
@@ -295,6 +308,7 @@ function ItemSection({
   items,
   onDelete,
   onConsume,
+  onEdit,
 }: {
   title: string;
   subtitle: string;
@@ -302,6 +316,7 @@ function ItemSection({
   items: FoodItem[];
   onDelete: (id: string) => void;
   onConsume: (id: string) => void;
+  onEdit: (id: string) => void;
 }) {
   return (
     <section>
@@ -317,6 +332,7 @@ function ItemSection({
               item={item}
               onDelete={onDelete}
               onConsume={onConsume}
+              onEdit={onEdit}
             />
           ))}
         </div>

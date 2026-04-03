@@ -2,8 +2,8 @@
 
 import { useState, useRef, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Calendar, Tag, Archive, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
-import type { Category, StorageType } from "@/lib/types";
+import { X, Plus, Calendar, Tag, Archive, Wallet, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import type { Category, StorageType, FoodItem } from "@/lib/types";
 import { CATEGORY_LABELS, STORAGE_LABELS } from "@/lib/types";
 import type { AddItemInput } from "@/hooks/use-fridge";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,8 @@ interface AddItemModalProps {
   open: boolean;
   onClose: () => void;
   onAdd: (input: AddItemInput) => void;
+  editItem?: FoodItem;
+  onUpdate?: (id: string, input: AddItemInput) => void;
 }
 
 const CATEGORIES: Category[] = [
@@ -35,7 +37,8 @@ const STORAGE_LABELS_KO: Record<StorageType, string> = {
   pantry: "실온",
 };
 
-export function AddItemModal({ open, onClose, onAdd }: AddItemModalProps) {
+export function AddItemModal({ open, onClose, onAdd, editItem, onUpdate }: AddItemModalProps) {
+  const isEditMode = !!editItem;
   const [name, setName] = useState("");
   const [category, setCategory] = useState<Category>("dairy");
   const [expiryYear, setExpiryYear] = useState("");
@@ -65,6 +68,23 @@ export function AddItemModal({ open, onClose, onAdd }: AddItemModalProps) {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [showCal]);
+
+  // 수정 모드: editItem이 바뀌면 폼에 기존 값을 채워넣기
+  useEffect(() => {
+    if (editItem) {
+      setName(editItem.name);
+      setCategory(editItem.category);
+      const [y, m, d] = editItem.expiryDate.split("-");
+      setExpiryYear(y);
+      setExpiryMonth(m);
+      setExpiryDay(d);
+      setCalYear(Number(y));
+      setCalMonth(Number(m) - 1);
+      setStorageType(editItem.storageType);
+      setPrice(editItem.price ? String(editItem.price) : "");
+      setError("");
+    }
+  }, [editItem]);
 
   const expiryDate =
     expiryYear && expiryMonth && expiryDay
@@ -130,13 +150,18 @@ export function AddItemModal({ open, onClose, onAdd }: AddItemModalProps) {
       setError("유통기한을 선택해주세요.");
       return;
     }
-    onAdd({
+    const input: AddItemInput = {
       name: name.trim(),
       category,
       expiryDate,
       storageType,
       price: price ? Number(price.replace(/,/g, "")) : undefined,
-    });
+    };
+    if (isEditMode && editItem && onUpdate) {
+      onUpdate(editItem.id, input);
+    } else {
+      onAdd(input);
+    }
     handleClose();
   };
 
@@ -170,7 +195,7 @@ export function AddItemModal({ open, onClose, onAdd }: AddItemModalProps) {
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-extrabold text-foreground">
-                  식품 추가
+                  {isEditMode ? "식품 수정" : "식품 추가"}
                 </h2>
                 <button
                   onClick={handleClose}
@@ -446,8 +471,8 @@ export function AddItemModal({ open, onClose, onAdd }: AddItemModalProps) {
                 onClick={handleSubmit}
                 className="w-full py-4 rounded-2xl bg-primary text-primary-foreground text-base font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-98 transition-all"
               >
-                <Plus className="w-5 h-5" />
-                냉장고에 추가하기
+                {isEditMode ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                {isEditMode ? "수정 완료" : "냉장고에 추가하기"}
               </button>
             </div>
           </motion.div>
