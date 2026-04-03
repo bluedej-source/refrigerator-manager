@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     // 2. 제미나이 AI 클라이언트 초기화
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Fallback to 1.5 flash to trigger error if needed
 
     // 3. 제미나이에게 내릴 지시사항(프롬프트)
     const prompt = `당신은 마트 영수증을 분석해 데이터로 변환하는 똑똑한 영수증 AI입니다. 
@@ -69,8 +69,21 @@ export async function POST(req: Request) {
     return Response.json(parsed);
   } catch (err: any) {
     console.error("[scan-receipt] 제미나이 API 처리 오류:", err.message || err);
+    
+    // Fetch available models for debugging
+    let availableModels = "";
+    try {
+      const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      const modelsData = await modelsRes.json();
+      if (modelsData && modelsData.models) {
+        availableModels = modelsData.models.map((m: any) => m.name.replace('models/', '')).filter((name: string) => name.includes('gemini')).join(', ');
+      }
+    } catch (_) {
+      // Ignore errors in fetching models
+    }
+
     return Response.json(
-      { error: "영수증 이미지 분석 중 오류가 발생했습니다. " + (err.message || "") },
+      { error: "사용 가능한 모델 목록: [" + availableModels + "] | 기존 에러: " + (err.message || "") },
       { status: 502 }
     );
   }
