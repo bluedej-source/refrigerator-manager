@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     // 2. 제미나이 AI 클라이언트 초기화
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // 3. 제미나이에게 내릴 지시사항(프롬프트)
     const prompt = `당신은 마트 영수증을 분석해 데이터로 변환하는 똑똑한 영수증 AI입니다. 
@@ -67,10 +67,10 @@ export async function POST(req: Request) {
     const parsed = JSON.parse(text);
 
     return Response.json(parsed);
-  } catch (err) {
-    console.error("[scan-receipt] 제미나이 API 처리 오류:", err);
+  } catch (err: any) {
+    console.error("[scan-receipt] 제미나이 API 처리 오류:", err.message || err);
     return Response.json(
-      { error: "영수증 이미지 분석 중 시스템 오류가 발생했습니다. 글자가 선명한지 확인해주세요." },
+      { error: "영수증 이미지 분석 중 오류가 발생했습니다. " + (err.message || "") },
       { status: 502 }
     );
   }
