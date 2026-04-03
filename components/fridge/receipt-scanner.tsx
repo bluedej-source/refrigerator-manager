@@ -109,7 +109,10 @@ export function ReceiptScanner({ onAddItems }: ReceiptScannerProps) {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("분석에 실패했어요.");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.error || "분석에 실패했어요.");
+      }
 
       const data: ParsedReceipt = await res.json();
 
@@ -122,8 +125,8 @@ export function ReceiptScanner({ onAddItems }: ReceiptScannerProps) {
       setParsed(data);
       setSelected(new Set(data.items.map((_, i) => i)));
       setScanState("result");
-    } catch {
-      setErrorMsg("영수증 분석 중 오류가 발생했어요. 다시 시도해 주세요.");
+    } catch (err: any) {
+      setErrorMsg(err.message || "영수증 분석 중 오류가 발생했어요. 다시 시도해 주세요.");
       setScanState("error");
     }
   };
