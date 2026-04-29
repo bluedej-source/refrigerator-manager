@@ -84,21 +84,9 @@ export async function POST(req: Request) {
     return Response.json(parsed);
   } catch (err: any) {
     console.error("[scan-receipt] 제미나이 API 처리 오류:", err.message || err);
-    
-    // Fetch available models for debugging
-    let availableModels = "";
-    try {
-      const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-      const modelsData = await modelsRes.json();
-      if (modelsData && modelsData.models) {
-        availableModels = modelsData.models.map((m: any) => m.name.replace('models/', '')).filter((name: string) => name.includes('gemini')).join(', ');
-      }
-    } catch (_) {
-      // Ignore errors in fetching models
-    }
 
     return Response.json(
-      { error: "사용 가능한 모델 목록: [" + availableModels + "] | 기존 에러: " + (err.message || "") },
+      { error: "영수증 분석 중 오류가 발생했습니다: " + (err.message || "") },
       { status: 502 }
     );
   }

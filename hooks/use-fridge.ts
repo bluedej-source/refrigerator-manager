@@ -44,7 +44,18 @@ export function useFridge() {
   useEffect(() => {
     const fetchItems = async () => {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+
+      // 5초 타임아웃 적용 (네트워크 지연 대비)
+      let user = null;
+      try {
+        const result = await Promise.race([
+          supabase.auth.getUser(),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 5000)),
+        ]) as any;
+        user = result?.data?.user ?? null;
+      } catch {
+        user = null;
+      }
 
       // 비로그인 상태: 빈 목록으로 시작
       if (!user) {
