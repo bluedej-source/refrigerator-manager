@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// 이미지를 base64로 변환해 Gemini 1.5 API에 전송하고, 분석된 JSON 데이터를 반환합니다.
+// 이미지를 base64로 변환해 Gemini 2.0 API에 전송하고, 분석된 JSON 데이터를 반환합니다.
 export async function POST(req: Request) {
   const apiKey = process.env.GEMINI_API_KEY;
 
