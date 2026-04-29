@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// 이미지를 base64로 변환해 Gemini 1.5 API에 전송하고, 분석된 JSON 데이터를 반환합니다.
+// 이미지를 base64로 변환해 Gemini API에 전송하고, 분석된 JSON 데이터를 반환합니다.
 export async function POST(req: Request) {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // 3. 제미나이에게 내릴 지시사항(프롬프트)
-    const prompt = `당신은 마트 영수증을 분석해 데이터로 변환하는 똑똑한 영수증 AI입니다. 
+    const prompt = `당신은 마트 영수증에서 오직 식재료(음식 재료)만 추출하는 전문 AI입니다.
 제공된 영수증 이미지를 분석하고 다음 JSON 형식으로 응답해 주세요. (반드시 마크다운 없이 순수 JSON만 반환)
 
 {
@@ -45,9 +45,24 @@ export async function POST(req: Request) {
   "date": "YYYY-MM-DD 형식의 결제일자(모르면 null)"
 }
 
-<주의사항>
-- "비닐봉투", "포인트적립", "보증금", "마이보틀" 등 식재료가 아닌 잡동사니 항목은 무조건 제외하세요.
-- 금액은 모두 숫자형(number)입니다. 콤마나 문자를 포함하지 마세요.`;
+<식재료 포함 기준 - 다음에 해당하는 것만 items에 추가>
+- 신선식품: 채소, 과일, 육류, 수산물, 달걀, 두부 등
+- 유제품: 우유, 치즈, 요거트, 버터 등
+- 가공식품: 라면, 과자, 통조림, 음료, 주스, 주류 등
+- 양념/조미료: 간장, 된장, 고추장, 소금, 설탕, 식용유, 식초 등
+- 즉석식품/밀키트: 즉석밥, 냉동식품, 밀키트 등
+- 빵/면류: 식빵, 국수, 파스타 등
+
+<반드시 제외할 항목 - 절대 items에 추가하지 말 것>
+- 생활용품: 세제, 샴푸, 린스, 비누, 치약, 칫솔, 면도기, 화장품, 기저귀, 생리대
+- 주방용품: 랩, 호일, 지퍼백, 쓰레기봉투, 행주, 수세미
+- 포장/봉투: 비닐봉투, 쇼핑백, 박스
+- 서비스/수수료: 포인트적립, 배달비, 환경부담금, 부가세(별도 항목), 보증금
+- 비식품 잡화: 전지, 건전지, 문구류, 의약품, 마스크, 장갑(고무장갑 등)
+- 기타: 영수증에 나오는 소계, 합계, 할인, 적립 등 계산 항목
+
+판단이 애매한 경우 식재료가 아니라고 판단하여 제외하세요.
+금액은 모두 숫자형(number)입니다. 콤마나 문자를 포함하지 마세요.`;
 
     // 4. API에 이미지와 프롬프트를 함께 전송
     const result = await model.generateContent([
