@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     // 2. 제미나이 AI 클라이언트 초기화
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Fallback to 1.5 flash to trigger error if needed
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); // Fallback to 1.5 flash to trigger error if needed
 
     // 3. 제미나이에게 내릴 지시사항(프롬프트)
     const prompt = `당신은 마트 영수증에서 오직 식재료(음식 재료)만 추출하는 전문 AI입니다.
