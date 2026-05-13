@@ -40,9 +40,16 @@ export default function SignUpPage() {
     });
 
     if (error) {
-      setError(error.message === "User already registered"
-        ? "이미 사용 중인 이메일입니다."
-        : "회원가입 중 오류가 발생했습니다.");
+      const msg = error.message;
+      if (msg.includes("User already registered") || msg.includes("already registered")) {
+        setError("이미 사용 중인 이메일입니다. 로그인을 시도해보세요.");
+      } else if (msg.includes("rate limit") || msg.includes("email_rate_limit")) {
+        setError("이메일 발송 횟수 제한에 걸렸습니다. 잠시 후 다시 시도해주세요.");
+      } else if (msg.includes("invalid") && msg.includes("email")) {
+        setError("유효하지 않은 이메일 주소입니다.");
+      } else {
+        setError(`회원가입 오류: ${msg}`);
+      }
       setLoading(false);
       return;
     }
@@ -129,7 +136,7 @@ export default function SignUpPage() {
 
             {/* 오류 메시지 */}
             {error && (
-              <p className="text-xs text-danger bg-danger-bg rounded-xl px-3 py-2">{error}</p>
+              <p className="text-xs text-red-500 bg-red-50 rounded-xl px-3 py-2">{error}</p>
             )}
 
             {/* 회원가입 버튼 */}
