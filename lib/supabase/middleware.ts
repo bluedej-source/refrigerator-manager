@@ -25,8 +25,8 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // 세션 쿠키 갱신만 수행하고 리다이렉트 없이 통과
-  await supabase.auth.getUser();
+  // getSession()은 로컬 JWT 검증으로 네트워크 호출 없이 빠르게 처리
+  await supabase.auth.getSession();
 
   return supabaseResponse;
 }
