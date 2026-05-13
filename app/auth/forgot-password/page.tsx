@@ -25,7 +25,12 @@ export default function ForgotPasswordPage() {
     const result = await resetPassword(formData);
 
     if (result?.error) {
-      setError("이메일 전송에 실패했습니다. 이메일 주소를 확인해주세요.");
+      const msg = result.error;
+      if (msg.includes("rate limit") || msg.includes("email_rate_limit")) {
+        setError("이메일 발송 횟수 제한에 걸렸습니다. 잠시 후 다시 시도해주세요.");
+      } else {
+        setError(`오류: ${msg}`);
+      }
       setLoading(false);
       return;
     }
