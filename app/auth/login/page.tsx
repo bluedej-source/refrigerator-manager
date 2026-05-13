@@ -25,7 +25,11 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      if (error.message.includes("Email not confirmed")) {
+        setError("이메일 인증이 완료되지 않았습니다. 가입 시 받은 인증 메일을 확인해주세요.");
+      } else {
+        setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      }
       setLoading(false);
       return;
     }
@@ -106,8 +110,15 @@ export default function LoginPage() {
 
             {/* 오류 메시지 */}
             {error && (
-              <p className="text-xs text-danger bg-danger-bg rounded-xl px-3 py-2">{error}</p>
+              <p className="text-xs text-red-500 bg-red-50 rounded-xl px-3 py-2">{error}</p>
             )}
+
+            {/* 비밀번호 찾기 */}
+            <div className="text-right">
+              <Link href="/auth/forgot-password" className="text-xs text-muted-foreground hover:text-primary hover:underline">
+                비밀번호를 잊으셨나요?
+              </Link>
+            </div>
 
             {/* 로그인 버튼 */}
             <button
