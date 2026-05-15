@@ -13,6 +13,7 @@ import { SavingsReport } from "@/components/fridge/savings-report";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { FilterType } from "@/components/fridge/dashboard-header";
+import { requestNotificationPermission, scheduleExpiryNotification } from "@/lib/notifications";
 
 type Tab = "list" | "report";
 
@@ -29,6 +30,8 @@ export function FridgeApp() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsGuest(!user);
     });
+    // 앱 시작 시 알림 권한 요청
+    requestNotificationPermission();
   }, []);
 
   const handleLogout = async () => {
@@ -55,6 +58,13 @@ export function FridgeApp() {
     thisMonthExpensesAmount,
     last3MonthsExpenses,
   } = useFridge();
+
+  // 식품 목록이 로드되면 내일 오전 9시 알림 예약
+  useEffect(() => {
+    if (!loading && items.length > 0) {
+      scheduleExpiryNotification(items);
+    }
+  }, [loading, items]);
 
   if (loading) {
     return (
